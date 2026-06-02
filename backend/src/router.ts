@@ -1,12 +1,9 @@
 import { Router } from "express"
+import user from "./routes/user.routes.ts"
 
 export const router = Router()
 
-
-router.get("/", (req, res) => {
-
-  res.send("hello this is working !!")
-})
+router.use("/user", user)
 
 
 
