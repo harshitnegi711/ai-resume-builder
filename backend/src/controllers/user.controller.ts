@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/ApiResponse.ts";
 import { AsyncHandler } from "../utils/AsyncHandler.ts";
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose";
+import type { AuthRequest } from "../middleware/verifyJwt.ts";
 
 // ----- register user ---------------------------------------
 
@@ -25,7 +26,7 @@ const register = AsyncHandler(async (req, res) => {
 })
 
 
-interface UserPayload extends Document {
+export interface UserPayload extends Document {
   _id: mongoose.Types.ObjectId;
   email: string;
   username: string;
@@ -40,13 +41,13 @@ interface TokenPair {
 
 const generateAccessAndRefreshToken = (user: UserPayload): TokenPair => {
   const accessToken = jwt.sign(
-    { id: user._id, email: user.email, username: user.username },
+    { _id: user._id, email: user.email, username: user.username },
     process.env.ACCESS_TOKEN_SECRET!,
     { expiresIn: (process.env.ACCESS_TOKEN_EXPIRY ?? '15m') as jwt.SignOptions['expiresIn'] }
   );
 
   const refreshToken = jwt.sign(
-    { id: user._id },
+    { _id: user._id },
     process.env.REFRESH_TOKEN_SECRET!,
     { expiresIn: (process.env.REFRESH_TOKEN_EXPIRY ?? '7d') as jwt.SignOptions['expiresIn'] }
   );
@@ -82,12 +83,27 @@ const login = AsyncHandler(async (req, res) => {
   const options = { httpOnly: true, secure: true }
 
   res.status(200)
-    .cookie("accesstoken", accessToken, options)
+    .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
     .json(ApiResponse(200, user, "successfully logged in "))
 
 })
 
+// ---- log out ---------------------------------
+
+const logout = AsyncHandler(async (req: AuthRequest, res) => {
+
+  const user = await User.findById(req.user?._id).select("-refreshToken -password")
+
+  if (!user) throw new ApiError(400, "invalid token ")
+
+  const options = { secure: true, httpOnly: true }
+
+  res.status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(ApiResponse(200, req?.user, "successfully logged out "))
+})
 
 
-export { register, login }
+export { register, login, logout }
