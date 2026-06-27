@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #333;
+            line-height: 1.5;
+            padding: 40px;
+            font-size: 14px;
+        }
+
+        h1 {
+            font-size: 30px;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            font-size: 18px;
+            color: #2563eb;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 4px;
+        }
+
+        .section {
+            margin-top: 24px;
+        }
+
+        .contact {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .contact a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .item {
+            margin-bottom: 18px;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 4px;
+        }
+
+        .role {
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .company {
+            color: #555;
+        }
+
+        .date {
+            color: #666;
+            font-size: 13px;
+        }
+
+        ul {
+            padding-left: 18px;
+        }
+
+        li {
+            margin-bottom: 4px;
+        }
+
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .skill {
+            padding: 5px 10px;
+            border: 1px solid #2563eb;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .project-links {
+            margin-top: 4px;
+            font-size: 13px;
+        }
+
+        .project-links a {
+            color: #2563eb;
+            text-decoration: none;
+            margin-right: 12px;
+        }
+
+        .tech-stack {
+            margin-top: 5px;
+            font-size: 13px;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header>
+        <h1><%= personalInfo.name %></h1>
+
+        <div class="contact">
+            <div>
+                <%= personalInfo.email %> |
+                <%= personalInfo.phone %> |
+                <%= personalInfo.location %>
+            </div>
+
+            <div>
+                <a href="<%= personalInfo.linkedin %>">LinkedIn</a> |
+                <a href="<%= personalInfo.github %>">GitHub</a> |
+                <a href="<%= personalInfo.website %>">Portfolio</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Summary -->
+    <% if(summary) { %>
+        <section class="section">
+            <h2>Professional Summary</h2>
+            <p><%= summary %></p>
+        </section>
+    <% } %>
+
+    <!-- Experience -->
+    <% if(experience && experience.length) { %>
+        <section class="section">
+            <h2>Experience</h2>
+
+            <% experience.forEach(exp => { %>
+                <div class="item">
+
+                    <div class="item-header">
+                        <div>
+                            <div class="role"><%= exp.role %></div>
+                            <div class="company">
+                                <%= exp.company %>
+                                <% if(exp.location) { %>
+                                    • <%= exp.location %>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <div class="date">
+                            <%= exp.startDate %> -
+                            <%= exp.current ? "Present" : exp.endDate %>
+                        </div>
+                    </div>
+
+                    <% if(exp.bullets && exp.bullets.length) { %>
+                        <ul>
+                            <% exp.bullets.forEach(bullet => { %>
+                                <li><%= bullet %></li>
+                            <% }) %>
+                        </ul>
+                    <% } %>
+
+                </div>
+            <% }) %>
+
+        </section>
+    <% } %>
+
+    <!-- Projects -->
+    <% if(projects && projects.length) { %>
+        <section class="section">
+            <h2>Projects</h2>
+
+            <% projects.forEach(project => { %>
+                <div class="item">
+
+                    <div class="role">
+                        <%= project.name %>
+                    </div>
+
+                    <p>
+                        <%= project.description %>
+                    </p>
+
+                    <div class="tech-stack">
+                        <strong>Tech Stack:</strong>
+                        <%= project.techStack.join(", ") %>
+                    </div>
+
+                    <div class="project-links">
+                        <% if(project.liveUrl) { %>
+                            <a href="<%= project.liveUrl %>">Live Demo</a>
+                        <% } %>
+
+                        <% if(project.githubUrl) { %>
+                            <a href="<%= project.githubUrl %>">GitHub</a>
+                        <% } %>
+                    </div>
+
+                </div>
+            <% }) %>
+
+        </section>
+    <% } %>
+
+    <!-- Education -->
+    <% if(education && education.length) { %>
+        <section class="section">
+            <h2>Education</h2>
+
+            <% education.forEach(edu => { %>
+                <div class="item">
+
+                    <div class="item-header">
+                        <div>
+                            <div class="role">
+                                <%= edu.degree %>
+                            </div>
+
+                            <div class="company">
+                                <%= edu.school %>
+                            </div>
+                        </div>
+
+                        <div class="date">
+                            <%= edu.startDate %> -
+                            <%= edu.endDate %>
+                        </div>
+                    </div>
+
+                </div>
+            <% }) %>
+
+        </section>
+    <% } %>
+
+    <!-- Skills -->
+    <% if(skills && skills.length) { %>
+        <section class="section">
+            <h2>Skills</h2>
+
+            <div class="skills">
+                <% skills.forEach(skill => { %>
+                    <div class="skill">
+                        <%= skill %>
+                    </div>
+                <% }) %>
+            </div>
+
+        </section>
+    <% } %>
+
+</body>
+</html>

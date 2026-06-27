@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Types } from "mongoose";
 
 const ExperienceSchema = new mongoose.Schema({
   company: { type: String, required: true },
@@ -25,29 +25,45 @@ const ProjectSchema = new mongoose.Schema({
   githubUrl: { type: String },
 }, { _id: true });
 
-const ResumeSchema = new mongoose.Schema({
+// --- TypeScript interface ---
+export interface IResume extends Document {
+  userId: Types.ObjectId;
+  title: string;
+  template: "modern" | "minimal" | "classic";
+  personalInfo: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    location?: string;
+    linkedin?: string;
+    github?: string;
+    website?: string;
+  };
+  summary?: string;
+  experience?: mongoose.Types.DocumentArray<any>;
+  education?: mongoose.Types.DocumentArray<any>;
+  projects?: mongoose.Types.DocumentArray<any>;
+  skills?: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// --- Main schema ---
+const ResumeSchema = new mongoose.Schema<IResume>({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   title: { type: String, default: "My Resume" },
   template: { type: String, enum: ["modern", "minimal", "classic"], default: "modern" },
-
   personalInfo: {
-    name: { type: String },
-    email: { type: String },
-    phone: { type: String },
-    location: { type: String },
-    linkedin: { type: String },
-    github: { type: String },
-    website: { type: String },
+    name: String, email: String, phone: String,
+    location: String, linkedin: String, github: String, website: String,
   },
-
   summary: { type: String },
   experience: [ExperienceSchema],
   education: [EducationSchema],
   projects: [ProjectSchema],
   skills: [{ type: String }],
-
-  // isPublic: { type: Boolean, default: false },
-
 }, { timestamps: true });
 
-export const Resume = mongoose.model("Resume", ResumeSchema);
+ResumeSchema.index({ userId: 1, createdAt: -1 });
+
+export const Resume = mongoose.model<IResume>("Resume", ResumeSchema);

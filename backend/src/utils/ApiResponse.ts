@@ -1,5 +1,5 @@
 
-export const ApiResponse = (statusCode: number, data: {} | string | [] | undefined, message: string = "successfully done") => {
+export const ApiResponse = (statusCode: number, data: any | string | [] | undefined, message: string = "successfully done") => {
   return {
     statusCode,
     data,
