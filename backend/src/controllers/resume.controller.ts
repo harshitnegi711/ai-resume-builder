@@ -9,6 +9,7 @@ import { ApiResponse } from "../utils/ApiResponse.ts"
 import { AsyncHandler } from "../utils/AsyncHandler.ts"
 import puppeteer from "puppeteer"
 import { title } from "node:process";
+import { model } from "../utils/gemeni.ts";
 
 
 const createResume = AsyncHandler(async (req: AuthRequest, res) => {
@@ -121,6 +122,38 @@ const downloadResume = AsyncHandler(async (req: AuthRequest, res) => {
 
 })
 
+// ----- Generate Summart ------------------------------------------- //
 
+const generateAiSummary = AsyncHandler(async (req: AuthRequest, res) => {
 
-export { createResume, getResume, updateResume, getResumeById, downloadResume }
+  const { resumeId } = req.body
+
+  const resume = await Resume.findOne({ _id: resumeId, userId: req.user._id })
+  if (!resume) throw new ApiError(405, "Resume not found !!")
+
+  const { personalInfo, experience, skills, projects } = resume;
+
+  const prompt = `
+You are a professional resume writer.
+Write a short, compelling professional summary for this person's resume.
+
+Details:
+- Name: ${personalInfo?.name || ""}
+- Skills: ${skills?.join(", ") || ""}
+- Experience: ${experience?.map(e => `${e.role} at ${e.company}`).join(", ") || ""}
+- Projects: ${projects?.map(p => p.name).join(", ") || ""}
+
+Rules:
+- 3 sentences max
+- Do not use "I" — write in third person or omit subject
+- Make it ATS friendly
+- Return ONLY the summary text, no explanation, no quotes
+`;
+
+  const result = await model.generateContent(prompt);
+  const summary = result.response.text().trim();
+
+  res.status(200).json(ApiResponse(200, summary, "Successfully fetched summary."))
+})
+
+export { createResume, getResume, updateResume, getResumeById, downloadResume, generateAiSummary }
